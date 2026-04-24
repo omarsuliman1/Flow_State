@@ -11,19 +11,18 @@ class TaskProvider with ChangeNotifier {
   bool _isDarkMode = false;
   String _userName = ""; 
 
-  // متغيرات الستريك العالمي الجديدة 🔥
-  int globalStreak = 0;
+   int currentStreak = 0; 
+  int maxGlobalStreak = 0; 
   DateTime lastSuccessDate = DateTime(2000); 
 
   List<WeeklyCategory> get categories => _categories;
-  List<DailyTask> get tasks => _tasks; // إضافة الـ getter المفقود
+  List<DailyTask> get tasks => _tasks; 
   bool get isDarkMode => _isDarkMode;
   String get userName => _userName;
 
   TaskProvider() { loadData(); }
 
-  // --- فانكشن الستريك العالمي ---
-  void updateGlobalStreak() {
+   void updateGlobalStreak() {
     DateTime now = DateTime.now();
     DateTime today = DateTime(now.year, now.month, now.day);
     
@@ -33,19 +32,28 @@ class TaskProvider with ChangeNotifier {
       lastSuccessDate.day
     );
 
-    if (today.isAfter(lastDate)) {
+     if (today.isAfter(lastDate)) {
       int difference = today.difference(lastDate).inDays;
 
       if (difference == 1) {
-        globalStreak++; 
+        currentStreak++; 
       } else {
-        globalStreak = 1; 
+        currentStreak = 1; 
       }
       
       lastSuccessDate = today; 
-      saveData(); // حفظ فوري للقيمة الجديدة
-      notifyListeners(); 
+    } 
+     else if (currentStreak == 0) {
+      currentStreak = 1;
+      lastSuccessDate = today;
     }
+
+    if (currentStreak > maxGlobalStreak) {
+      maxGlobalStreak = currentStreak;
+    }
+    
+    saveData(); 
+    notifyListeners(); 
   }
 
   void toggleTheme() async {
@@ -59,12 +67,10 @@ class TaskProvider with ChangeNotifier {
     _userName = name;
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('userName', name);
-    // تفعيل إشعار الساعة 8 الصبح
     NotificationService().scheduleDaily8AM(100, name);
     notifyListeners();
   }
 
-  // 👇 التعديل الجديد لدعم الديدلاين في الخطط اليومية 👇
   void addCategory(String title, String type, int days, int target, {DateTime? deadline}) {
     DateTime start = DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day);
     
@@ -100,14 +106,12 @@ class TaskProvider with ChangeNotifier {
     } catch (e) { return 0; }
   }
 
-  bool PlanFinished(WeeklyCategory cat) {
+   bool PlanFinished(WeeklyCategory cat) {
     return cat.progress >= 1.0;
   }
 
   void deleteCategory(String id) {
-    // إلغاء إشعارات البلان قبل حذفها
     NotificationService().cancelPlanReminders(id.hashCode);
-    
     _categories.removeWhere((c) => c.id == id);
     saveData();
     notifyListeners();
@@ -131,7 +135,6 @@ class TaskProvider with ChangeNotifier {
       isCompleted: false,
     ));
 
-    // 👇 تفعيل إشعارات الـ Parallel كل ساعتين عند إضافة أول تاسك 👇
     final cat = _categories.firstWhere((c) => c.id == categoryId);
     NotificationService().schedulePlanReminders(
       planId: categoryId.hashCode,
@@ -147,10 +150,16 @@ class TaskProvider with ChangeNotifier {
 
   void toggleTaskStatus(String taskId) {
     final index = _tasks.indexWhere((t) => t.id == taskId);
-    if (index != -1 && !_tasks[index].isCompleted) {
-      _tasks[index].isCompleted = true;
+    if (index != -1) {
+      bool wasCompleted = _tasks[index].isCompleted;
+      _tasks[index].isCompleted = !_tasks[index].isCompleted;
+      
       _updateCategoryProgress(_tasks[index].categoryId);
-      updateGlobalStreak();
+      
+       if (!wasCompleted && _tasks[index].isCompleted) {
+        updateGlobalStreak();
+      }
+      
       saveData();
       notifyListeners();
     }
@@ -163,7 +172,6 @@ class TaskProvider with ChangeNotifier {
       double newProgress = (completed / _categories[catIndex].targetAmount).clamp(0.0, 1.0);
       
       if (newProgress >= 1.0 && _categories[catIndex].progress < 1.0) {
-        // إيقاف إشعارات التذكير فور اكتمال الخطة
         NotificationService().cancelPlanReminders(categoryId.hashCode);
 
         NotificationService().showInstantNotification(
@@ -176,7 +184,7 @@ class TaskProvider with ChangeNotifier {
     }
   }
 
-  int getCurrentStreak() {
+   int getCurrentStreak() {
     if (_tasks.isEmpty) return 0;
     final completedDates = _tasks
         .where((t) => t.isCompleted)
@@ -226,19 +234,17 @@ class TaskProvider with ChangeNotifier {
     await prefs.setString('tasks', jsonEncode(_tasks.map((t) => t.toMap()).toList()));
     await prefs.setBool('isDarkMode', _isDarkMode);
     await prefs.setString('userName', _userName);
-    await prefs.setInt('globalStreak', globalStreak);
+    await prefs.setInt('currentStreak', currentStreak); 
+    await prefs.setInt('maxGlobalStreak', maxGlobalStreak); 
     await prefs.setString('lastSuccessDate', lastSuccessDate.toIso8601String());
-  }
-
-  void testNotification() {
-    NotificationService().showInstantNotification("Test", "Done!");
   }
 
   Future<void> loadData() async {
     final prefs = await SharedPreferences.getInstance();
     _isDarkMode = prefs.getBool('isDarkMode') ?? true;
     _userName = prefs.getString('userName') ?? "";
-    globalStreak = prefs.getInt('globalStreak') ?? 0;
+    currentStreak = prefs.getInt('currentStreak') ?? 0;
+    maxGlobalStreak = prefs.getInt('maxGlobalStreak') ?? 0;
     String? lastDateStr = prefs.getString('lastSuccessDate');
     if (lastDateStr != null) {
       lastSuccessDate = DateTime.parse(lastDateStr);

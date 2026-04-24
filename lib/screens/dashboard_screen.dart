@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';  
 import 'package:provider/provider.dart';
 import 'package:percent_indicator/percent_indicator.dart';
 import 'package:intl/intl.dart';
@@ -73,13 +74,33 @@ class _DashboardScreenState extends State<DashboardScreen> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 const Text("Activity Map", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                Text("${provider.getCurrentStreak()} Days in a row🔥", 
+                Text("${provider.currentStreak} Current Streak🔥", 
                   style: const TextStyle(color: Colors.orange, fontWeight: FontWeight.bold)),
               ],
             ),
             const SizedBox(height: 15),
             _buildGlobalStreak(provider),
             const SizedBox(height: 30),
+
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(vertical: 12),
+              margin: const EdgeInsets.only(bottom: 15),
+              decoration: BoxDecoration(
+                color: provider.isDarkMode ? Colors.white.withOpacity(0.05) : Colors.black.withOpacity(0.03),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Center(
+                child: Text(
+                  "${provider.maxGlobalStreak} Days in a row 🔥", 
+                  style: const TextStyle(
+                    color: Colors.orange, 
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                  ),
+                ),
+              ),
+            ),
             
             ElevatedButton(
               onPressed: () => _showAddGoalDialog(context, provider),
@@ -142,7 +163,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
       itemBuilder: (context, index) {
         final cat = provider.categories[index];
         bool finished = provider.isPlanFinished(cat);
-        bool missed = provider.isDeadlineMissed(cat); // فحص حالة الديدلاين
+        bool missed = provider.isDeadlineMissed(cat); 
 
         return GestureDetector(
           onTap: () => Navigator.push(context, MaterialPageRoute(
@@ -153,7 +174,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
             decoration: BoxDecoration(
               color: provider.isDarkMode ? const Color(0xFF1E1E1E) : Colors.white,
               borderRadius: BorderRadius.circular(20),
-              // تعديل الحدود بناءً على الحالة: برتقالي للفوز، أحمر للخسارة
               border: Border.all(
                 color: finished ? Colors.orange : (missed ? Colors.red : Colors.transparent), 
                 width: 2
@@ -224,16 +244,21 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 children: [
                   TextFormField(
                     decoration: const InputDecoration(labelText: "Plan Name", hintText: "e.g. Solve Problems"),
+                   
+                    inputFormatters: [
+                      FilteringTextInputFormatter.allow(RegExp(r'[a-zA-Z\s]')), 
+                    ],
                     validator: (value) {
                       if (value == null || value.trim().isEmpty) return "Name is required";
-                      if (!RegExp(r'^[a-zA-Z0-9 ]+$').hasMatch(value)) return "English letters & numbers only";
+                      
+                      if (!RegExp(r'^[a-zA-Z\s]+$').hasMatch(value)) return "English letters only (No numbers)";
                       return null;
                     },
                     onChanged: (v) => title = v,
                   ),
                   const SizedBox(height: 10),
                   DropdownButtonFormField<String>(
-                    initialValue: type,
+                    value: type,
                     isExpanded: true,
                     items: const [
                       DropdownMenuItem(value: 'day', child: Text("Daily Plan (1 Day)")),
@@ -273,6 +298,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   if (type != 'day')
                     TextFormField(
                       keyboardType: TextInputType.number,
+                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                       decoration: InputDecoration(labelText: "Duration (Days)", hintText: type == 'week' ? "2 to 7" : "8 to 30"),
                       validator: (value) {
                         int? val = int.tryParse(value ?? "");
@@ -285,6 +311,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     ),
                   TextFormField(
                     keyboardType: TextInputType.number,
+                    inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                     decoration: const InputDecoration(labelText: "Target Tasks"),
                     validator: (value) {
                       if (value == null || value.isEmpty) return "Target is required";
@@ -348,7 +375,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
     String name = "";
     showDialog(context: context, barrierDismissible: false, builder: (ctx) => AlertDialog(
       title: const Text("Welcome! Enter Your Name"),
-      content: TextField(onChanged: (v) => name = v, decoration: const InputDecoration(hintText: "Your name here...")),
+      content: TextField(
+        onChanged: (v) => name = v, 
+        decoration: const InputDecoration(hintText: "Your name here...")
+      ),
       actions: [
         ElevatedButton(onPressed: () { 
           if (name.isNotEmpty) { 
