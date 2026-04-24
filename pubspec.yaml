@@ -1,8 +1,8 @@
-name: weekly_tasks
+name: Flow_State
 description: "A professional productivity app for tracking streaks and goals."
 publish_to: 'none'
 
-version: 1.0.0+1
+version: 1.0.0+2
 
 environment:
   sdk: '>=3.2.0 <4.0.0'
@@ -10,24 +10,12 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-
-  # الأيقونات الأساسية
   cupertino_icons: ^1.0.6
-
-  # إدارة الحالة (State Management)
   provider: ^6.1.1
-
-  # تخزين البيانات والاسم محلياً (Local Storage)
   shared_preferences: ^2.2.2
-
-  # نظام الإشعارات وجدولة المواعيد (Notifications)
   flutter_local_notifications: ^17.0.0
   timezone: ^0.9.4
-
-  # مؤشرات الإنجاز الدائرية (UI Progress)
   percent_indicator: ^4.2.3
-
-  # تنسيق المواعيد والتواريخ (Date Formatting)
   intl: ^0.19.0
 
 dev_dependencies:
@@ -37,7 +25,3 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
-
-  # تأكد من تعريف مجلد الأصول إذا كنت تستخدم أيقونة مخصصة للتطبيق أو صور
-  # assets:
-  #   - assets/images/
