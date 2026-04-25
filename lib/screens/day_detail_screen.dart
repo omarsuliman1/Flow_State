@@ -13,8 +13,7 @@ class DayDetailScreen extends StatelessWidget {
     final provider = Provider.of<TaskProvider>(context);
     final tasks = provider.getTasksForCategory(category.id);
 
-    // الحساب الدقيق لعدد الأيام بدون زيادات
-    int totalDays = category.endDate.difference(category.startDate).inDays;
+     int totalDays = category.endDate.difference(category.startDate).inDays;
 
     return Scaffold(
       appBar: AppBar(
@@ -28,8 +27,7 @@ class DayDetailScreen extends StatelessWidget {
       ),
       body: Column(
         children: [
-          // 1. المربعات تظهر فقط لو الخطة أسبوعية أو شهرية (أكبر من يوم)
-          if (totalDays > 1)
+           if (totalDays > 1)
             Container(
               width: double.infinity,
               padding: const EdgeInsets.all(16),
@@ -60,8 +58,7 @@ class DayDetailScreen extends StatelessWidget {
                     builder: (context, constraints) {
                       double spacing = 4.0;
                       double availableWidth = constraints.maxWidth;
-                      // تقسيم المساحة بالظبط على عدد الأيام المختار
-                      double boxSize = ((availableWidth - (totalDays * spacing)) /
+                       double boxSize = ((availableWidth - (totalDays * spacing)) /
                               totalDays)
                           .clamp(12.0, 30.0);
 
@@ -89,8 +86,7 @@ class DayDetailScreen extends StatelessWidget {
               ),
             ),
 
-          // 2. شريط المهام المتبقية
-          Padding(
+           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 15),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -117,8 +113,7 @@ class DayDetailScreen extends StatelessWidget {
             ),
           ),
 
-          // 3. قائمة المهام
-          Expanded(
+           Expanded(
             child: ListView.builder(
               padding: const EdgeInsets.symmetric(horizontal: 10),
               itemCount: tasks.length,
@@ -165,15 +160,13 @@ class DayDetailScreen extends StatelessWidget {
         ],
       ),
 
-      // 👇 التعديل الجديد: زرارين عائمين (التايمر + الإضافة) 👇
-      floatingActionButton: Padding(
-        padding: const EdgeInsets.only(left: 30), // لضمان عدم تداخل الأزرار مع الـ UI
+       floatingActionButton: Padding(
+        padding: const EdgeInsets.only(left: 30),  
         child: Row(
           mainAxisAlignment: MainAxisAlignment.end,
           children: [
-            // 🚀 زرار الفوكس تايمر (أزرق)
-            FloatingActionButton(
-              heroTag: "btn_timer_details", // تاج فريد عشان الإيرور
+             FloatingActionButton(
+              heroTag: "btn_timer_details",     
               onPressed: () => _showFocusTimerDialog(context),
               backgroundColor: Colors.blueAccent,
               child: const Icon(Icons.timer_outlined, color: Colors.white),
@@ -181,9 +174,8 @@ class DayDetailScreen extends StatelessWidget {
             
             const SizedBox(width: 15),
 
-            // ➕ زرار إضافة التاسك (الأصلي بتاعك بنفس المنطق)
-            FloatingActionButton(
-              heroTag: "btn_add_details", // تاج فريد
+             FloatingActionButton(
+              heroTag: "btn_add_details",  
               onPressed: () {
                 int addedTasks = provider.getTotalAddedTasks(category.id);
                 if (addedTasks < category.targetAmount) {
@@ -199,7 +191,7 @@ class DayDetailScreen extends StatelessWidget {
                   );
                 }
               },
-              backgroundColor: const Color(0xFF00FF41), // لون النيون بتاعك
+              backgroundColor: const Color(0xFF00FF41),  
               child: const Icon(Icons.add, color: Colors.black),
             ),
           ],
@@ -208,7 +200,7 @@ class DayDetailScreen extends StatelessWidget {
     );
   }
 
-  // --- Functions ---
+  
 
   void _showEditDialog(BuildContext context, TaskProvider p) {
     String newTitle = category.title;
