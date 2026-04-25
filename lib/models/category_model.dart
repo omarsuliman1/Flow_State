@@ -3,14 +3,13 @@ class WeeklyCategory {
   final String id;
   String title;
 
-  final String durationType; // 'day', 'week', 'month'
+  final String durationType; 
   final DateTime startDate;
   final DateTime endDate;
   final int targetAmount;
   double progress;
   
-  // 👇 التعديل الجديد: الديدلاين لليومي فقط
-  final DateTime? dailyDeadline; 
+   final DateTime? dailyDeadline; 
 
   WeeklyCategory({
     required this.id,
@@ -20,7 +19,7 @@ class WeeklyCategory {
     required this.endDate,
     required this.targetAmount,
     required this.progress,
-    this.dailyDeadline, // اختياري
+    this.dailyDeadline, 
   });
 
   Map<String, dynamic> toMap() {
@@ -32,8 +31,7 @@ class WeeklyCategory {
       'endDate': endDate.toIso8601String(),
       'targetAmount': targetAmount,
       'progress': progress,
-      // 👇 حفظ الديدلاين في الماب
-      'dailyDeadline': dailyDeadline?.toIso8601String(),
+       'dailyDeadline': dailyDeadline?.toIso8601String(),
     };
   }
 
@@ -46,14 +44,12 @@ class WeeklyCategory {
       endDate: DateTime.parse(map['endDate'] ?? DateTime.now().toIso8601String()),
       targetAmount: map['targetAmount'] ?? 1,
       progress: (map['progress'] ?? 0.0).toDouble(),
-      // 👇 استعادة الديدلاين من الماب
-      dailyDeadline: map['dailyDeadline'] != null ? DateTime.parse(map['dailyDeadline']) : null,
+       dailyDeadline: map['dailyDeadline'] != null ? DateTime.parse(map['dailyDeadline']) : null,
     );
   }
 }
 
-// كلاس الـ DailyTask بيفضل زي ما هو لأنك ضايف فيه الـ deadline فعلاً
-class DailyTask {
+ class DailyTask {
   final String id;
   final String categoryId;
   final String title;
