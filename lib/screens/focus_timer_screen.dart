@@ -66,7 +66,7 @@ class _FocusTimerScreenState extends State<FocusTimerScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF1A1A1A), // Dark mode للتركيز
+      backgroundColor: const Color(0xFF1A1A1A),   
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
